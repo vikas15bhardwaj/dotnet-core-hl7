@@ -1,0 +1,8 @@
+/Users/iug8399/dotnet-core/dotnet-core-hl7/src/hl7/bin/Debug/netstandard2.0/hl7.deps.json
+/Users/iug8399/dotnet-core/dotnet-core-hl7/src/hl7/bin/Debug/netstandard2.0/hl7.dll
+/Users/iug8399/dotnet-core/dotnet-core-hl7/src/hl7/bin/Debug/netstandard2.0/hl7.pdb
+/Users/iug8399/dotnet-core/dotnet-core-hl7/src/hl7/obj/Debug/netstandard2.0/hl7.csprojAssemblyReference.cache
+/Users/iug8399/dotnet-core/dotnet-core-hl7/src/hl7/obj/Debug/netstandard2.0/hl7.AssemblyInfoInputs.cache
+/Users/iug8399/dotnet-core/dotnet-core-hl7/src/hl7/obj/Debug/netstandard2.0/hl7.AssemblyInfo.cs
+/Users/iug8399/dotnet-core/dotnet-core-hl7/src/hl7/obj/Debug/netstandard2.0/hl7.dll
+/Users/iug8399/dotnet-core/dotnet-core-hl7/src/hl7/obj/Debug/netstandard2.0/hl7.pdb

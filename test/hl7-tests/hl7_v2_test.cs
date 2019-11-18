@@ -39,10 +39,10 @@ namespace HL7_Tests
             HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
 
             string[] zcs = hl7.Get("ZCS[1]");
-            Assert.Equal(1, zcs.Length);
+            Assert.Single(zcs);
             Assert.Equal("ZCS|2|^^^^||||04444", zcs[0]);
             zcs = hl7.Get("ZCS[0]");
-            Assert.Equal(1, zcs.Length);
+            Assert.Single(zcs);
             Assert.Equal("ZCS|1|^^^^||||04446", zcs[0]);
 
         }

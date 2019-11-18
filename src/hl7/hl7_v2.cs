@@ -10,6 +10,10 @@ namespace HL7
             _message = new HL7.Core.V2.Message(hl7Message);
         }
 
+        public string Get()
+        {
+            return _message.Get();
+        }
         public string[] Get(string field_name)
         {
             return _message.Get(field_name);

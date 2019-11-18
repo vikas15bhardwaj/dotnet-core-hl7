@@ -44,6 +44,11 @@ namespace HL7.Core.V2
             }
         }
 
+        internal string Get()
+        {
+            return message_segment_list.Select(s => s.segment.ToString()).Aggregate((s1, s2) => s1 + segment_separator + s2);
+        }
+
         internal string[] Get(string field_name)
         {
             //field_name needs to like MSH_2
@@ -54,7 +59,7 @@ namespace HL7.Core.V2
             //if requested field is just segment e.g. PID, then entire PID segment should be returned
             if (field_detail.Length == 1)
                 return segment_list?
-                .Select(s => s.segment_name + field_separator + s.segment.ToString()).ToArray();
+                .Select(s => s.segment.ToString()).ToArray();
             else
                 return segment_list?
                 .Select(s => s.segment.Get(field_name)).ToArray();

@@ -1,5 +1,3 @@
-/src/hl7/bin/
-/src/hl7/obj/
-/test/hl7-tests/bin/
-/test/hl7-tests/obj/
-/**/.DSStore
+bin
+obj
+.DSStore

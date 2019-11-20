@@ -52,35 +52,87 @@ namespace HL7.Core.V2
         internal string[] Get(string field_name)
         {
             //field_name needs to like MSH_2
-            var field_detail = field_name.Split('_');
+            var field_detail = ParseField(field_name);
 
-            var segment_list = GetSegmentList(field_detail[0]);
+            var segment_list = GetSegmentList(field_detail.SegmentName, field_detail.SegmentIndex);
 
             //if requested field is just segment e.g. PID, then entire PID segment should be returned
-            if (field_detail.Length == 1)
+            if (field_detail.FieldName == null)
                 return segment_list?
                 .Select(s => s.segment.ToString()).ToArray();
             else
                 return segment_list?
-                .Select(s => s.segment.Get(field_name)).ToArray();
+                .Select(s => s.segment.Get(field_detail.FieldName, field_detail.FieldIndex)).ToArray();
         }
 
-        private List<(string segment_name, int index, Segment segment)> GetSegmentList(string field_name)
-        {
-            //if field_name is in format having index e.g. PID[1], the this regex will split into two
-            //PID and 1. if no index then return all segments, otherwise return the one requested
-            Regex regex = new Regex("[^A-Z0-9+]");
-            var segment_detail = regex.Split(field_name);
-            var segment_name = segment_detail[0];
-            int index = -1;
-            if (segment_detail.Length >= 2)
-                index = Convert.ToInt32(segment_detail[1]);
 
+        private List<(string segment_name, int index, Segment segment)> GetSegmentList(string segment_name, int index)
+        {
             if (index >= 0)
                 return message_segment_list.Where(x => x.segment_name == segment_name && x.index == index).ToList();
             else
                 return message_segment_list.Where(x => x.segment_name == segment_name).ToList();
 
+        }
+
+        private Field ParseField(string hl7Field)
+        {
+            //field name can be in this format max PID[0]_3[0]_1_6. This mean PID3.6.1 field of first PID segment and first PID3 in that segment
+            //this method parse it the field separately as follows:
+            //segment_name = PID, segment_index = 0, field_name = PID_3, field_index = 0, component_name = PID_3_1 and sub_component_name = PID_3_1_6
+            //default index is -1
+            var field_details = hl7Field.Split('_');
+            string segment_name = null;
+            int segment_index = -1;
+            string field_name = null;
+            int field_index = -1;
+            string component_name = null;
+            string sub_component_name = null;
+
+            Regex regex = new Regex("[^A-Z0-9+]");
+
+            int index = 0;
+
+            foreach (var field in field_details)
+            {
+                switch (index)
+                {
+                    case 0:
+                        var segment_detail = regex.Split(field);
+
+                        segment_name = segment_detail[0];
+                        if (segment_detail.Length >= 2)
+                            segment_index = Convert.ToInt32(segment_detail[1]);
+
+                        break;
+                    case 1:
+                        var f_detail = regex.Split(field);
+
+                        field_name = segment_name + "_" + f_detail[0];
+                        if (f_detail.Length >= 2)
+                            field_index = Convert.ToInt32(f_detail[1]);
+
+                        break;
+                    case 2:
+                        component_name = field_name + "_" + field;
+                        break;
+                    case 3:
+                        sub_component_name = component_name + "_" + field;
+                        break;
+
+                }
+                index++;
+            }
+
+            return new Field
+            {
+                SegmentName = segment_name,
+                SegmentIndex = segment_index,
+                FieldName = field_name,
+                FieldIndex = field_index,
+                ComponentName = component_name,
+                SubComponentName = sub_component_name
+            };
         }
     }
 }

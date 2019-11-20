@@ -8,7 +8,7 @@ namespace HL7.Core.V2
     {
         string _field_separator;
         string _segment_name;
-        List<(string field_name, int index, string field_value, Component component)> fields
+        List<(string field_name, int index, string field_value, Component component)> _fields
             = new List<(string field_name, int index, string field_value, Component component)>();
 
         internal Segment(string segment, string field_separator, string component_separator, string sub_component_separator, string field_array_separator)
@@ -26,18 +26,18 @@ namespace HL7.Core.V2
                 if (field_name != "MSH_2" && field.Contains(field_array_separator))
                 {
                     //for an array field, add one entry with entire field and then one entry for each array element
-                    fields.Add((field_name, -1, field, null));
+                    _fields.Add((field_name, -1, field, null));
 
                     var array_fields = field.Split(field_array_separator.ToCharArray());
                     int arr_index = 0;
                     foreach (var afield in array_fields)
                     {
-                        fields.Add((field_name, arr_index++, afield, Component.GetComponent(field_name, afield, component_separator, sub_component_separator)));
+                        _fields.Add((field_name, arr_index++, afield, Component.GetComponent(field_name, afield, component_separator, sub_component_separator)));
                     }
 
                 }
                 else
-                    fields.Add((field_name, -1, field, Component.GetComponent(field_name, field, component_separator, sub_component_separator)));
+                    _fields.Add((field_name, -1, field, Component.GetComponent(field_name, field, component_separator, sub_component_separator)));
 
                 index++;
             }
@@ -46,11 +46,19 @@ namespace HL7.Core.V2
 
         public override string ToString()
         {
-            return _segment_name + _field_separator + fields.Where(f => f.index == -1).Select(f => f.field_value)?.Aggregate((f1, f2) => f1 + _field_separator + f2);
+            return _segment_name + _field_separator + _fields.Where(f => f.index == -1).Select(f => f.field_value)?.Aggregate((f1, f2) => f1 + _field_separator + f2);
         }
-        internal string Get(string field_name)
+        internal string Get(string field_name, int field_index)
         {
-            return "";
+            //if trying to get a full segment field e.g. MSH_10 or MSH9 or PID3. i.e. get all component, subcomponent and array in it.
+            var field = _fields.Where(f => f.field_name == field_name && f.index == field_index);
+            if (field.Count() > 0)
+                return field.Select(f => f.field_value).FirstOrDefault();
+
+            //if trying to get specific index of an array field. e.g. PID_3[0] i.e. first element of array of PID_3
+
+
+            return null;
         }
     }
 }

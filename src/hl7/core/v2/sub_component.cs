@@ -25,5 +25,14 @@ namespace HL7.Core.V2
             }
         }
 
+        public string Get(Field field)
+        {
+            var field2 = sub_components_list.Where(f => f.sub_component_name == field.SubComponentName);
+
+            if (field2.Count() > 0)
+                return field2.Select(f => f.sub_component_value).FirstOrDefault();
+
+            return null;
+        }
     }
 }

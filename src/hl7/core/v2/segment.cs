@@ -48,12 +48,15 @@ namespace HL7.Core.V2
         {
             return _segment_name + _field_separator + _fields.Where(f => f.index == -1).Select(f => f.field_value)?.Aggregate((f1, f2) => f1 + _field_separator + f2);
         }
-        internal string Get(string field_name, int field_index)
+        internal string Get(Field field)
         {
+
             //if trying to get a full segment field e.g. MSH_10 or MSH9 or PID3. i.e. get all component, subcomponent and array in it.
-            var field = _fields.Where(f => f.field_name == field_name && f.index == field_index);
-            if (field.Count() > 0)
-                return field.Select(f => f.field_value).FirstOrDefault();
+            var field2 = _fields.Where(f => f.field_name == field.FieldName && f.index == field.FieldIndex);
+            if (field2.Count() > 0 && String.IsNullOrEmpty(field.ComponentName))
+                return field2.Select(f => f.field_value).FirstOrDefault();
+            else if (field2.Count() > 0)
+                return field2.Select(f => f.component.Get(field)).FirstOrDefault();
 
             //if trying to get specific index of an array field. e.g. PID_3[0] i.e. first element of array of PID_3
 

@@ -94,9 +94,29 @@ namespace HL7_Tests
             HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
 
             string[] msh91 = hl7.Get("MSH_9_1");
+            string[] msh92 = hl7.Get("MSH_9_2");
 
             Assert.Equal("ADT", msh91[0]);
+            Assert.Equal("A08", msh92[0]);
 
+        }
+
+        [Fact]
+        public void GetSubComponentFieldTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            string[] al1_33 = hl7.Get("AL1_3_3");
+
+            string[] al1_331 = hl7.Get("AL1_3_3_1");
+
+            string[] al1_332 = hl7.Get("AL1_3_3_2");
+            Assert.Equal("No Known Allergies&NA", al1_33[0]);
+
+            Assert.Equal("No Known Allergies", al1_331[0]);
+
+            Assert.Equal("NA", al1_332[0]);
         }
     }
 }

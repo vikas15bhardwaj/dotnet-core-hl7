@@ -52,17 +52,17 @@ namespace HL7.Core.V2
         internal string[] Get(string field_name)
         {
             //field_name needs to like MSH_2
-            var field_detail = ParseField(field_name);
+            var field = ParseField(field_name);
 
-            var segment_list = GetSegmentList(field_detail.SegmentName, field_detail.SegmentIndex);
+            var segment_list = GetSegmentList(field.SegmentName, field.SegmentIndex);
 
             //if requested field is just segment e.g. PID, then entire PID segment should be returned
-            if (field_detail.FieldName == null)
+            if (field.FieldName == null)
                 return segment_list?
                 .Select(s => s.segment.ToString()).ToArray();
             else
                 return segment_list?
-                .Select(s => s.segment.Get(field_detail.FieldName, field_detail.FieldIndex)).ToArray();
+                .Select(s => s.segment.Get(field)).ToArray();
         }
 
 

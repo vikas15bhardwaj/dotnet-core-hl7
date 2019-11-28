@@ -6,7 +6,7 @@ namespace HL7.Core.V2
 {
     internal class SubComponent
     {
-        List<(string sub_component_name, string sub_component_value)> sub_components_list = new List<(string sub_component_name, string sub_component_value)>();
+        List<(string sub_component_name, string sub_component_value)> _sub_components_list = new List<(string sub_component_name, string sub_component_value)>();
 
         internal static SubComponent GetSubComponent(string component_name, string component_value, string sub_component_separator)
         {
@@ -21,18 +21,26 @@ namespace HL7.Core.V2
             int index = 1;
             foreach (var sub_component_value in sub_components)
             {
-                sub_components_list.Add(($"{component_name}_{index++}", sub_component_value));
+                _sub_components_list.Add(($"{component_name}_{index++}", sub_component_value));
             }
         }
 
         public string Get(Field field)
         {
-            var field2 = sub_components_list.Where(f => f.sub_component_name == field.SubComponentName);
+            return _sub_components_list.Where(f => f.sub_component_name == field.SubComponentName)
+                                        .Select(f => f.sub_component_value).FirstOrDefault();
+        }
 
-            if (field2.Count() > 0)
-                return field2.Select(f => f.sub_component_value).FirstOrDefault();
-
-            return null;
+        public void Set(Field field, string value)
+        {
+            var sub_component = _sub_components_list.Where(f => f.sub_component_name == field.SubComponentName).FirstOrDefault();
+            if (sub_component == (null, null))
+            {
+                sub_component = (field.SubComponentName, value);
+                _sub_components_list.Add(sub_component);
+            }
+            else
+                sub_component.sub_component_value = value;
         }
     }
 }

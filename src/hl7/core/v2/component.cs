@@ -28,14 +28,21 @@ namespace HL7.Core.V2
 
         public string Get(Field field)
         {
-            var field2 = components_list.Where(f => f.component_name == field.ComponentName);
+            var component = components_list.Where(f => f.component_name == field.ComponentName);
 
-            if (field2.Count() > 0 && String.IsNullOrEmpty(field.SubComponentName))
-                return field2.Select(f => f.component_value).FirstOrDefault();
-            else if (field2.Count() > 0)
-                return field2.Select(f => f.sub_component.Get(field)).FirstOrDefault();
+            if (component.Count() > 0 && String.IsNullOrEmpty(field.SubComponentName))
+                return component.Select(f => f.component_value).FirstOrDefault();
+            else if (component.Count() > 0)
+                return component.Select(f => f.sub_component.Get(field)).FirstOrDefault();
 
             return null;
+        }
+
+        public void Set(Field field, string value)
+        {
+            //var component = components_list.Where(f => f.component_name == field.ComponentName);
+            //if (component.Count() > 0 && String.IsNullOrEmpty(field.SubComponentName))
+
         }
     }
 }

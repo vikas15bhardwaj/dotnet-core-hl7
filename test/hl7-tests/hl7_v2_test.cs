@@ -46,6 +46,19 @@ namespace HL7_Tests
             Assert.Equal("ZCS|1|^^^^||||04446", zcs[0]);
 
         }
+
+        [Fact]
+        public void GetOneOfTheSegmentFieldTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            string[] zcs1_1 = hl7.Get("ZCS[1]_1");
+
+            Assert.Equal("2", zcs1_1[0]);
+            Assert.Equal("04444", hl7.Get("ZCS[1]_6")[0]);
+        }
         [Fact]
         public void GetMessageTest()
         {
@@ -83,7 +96,7 @@ namespace HL7_Tests
 
             string[] pid3 = hl7.Get("PID_3");
 
-            Assert.Equal("J000XXXXX^akjsaks~J121212^aksaksj", pid3[0]);
+            Assert.Equal("J000XXXXX^akjsaks~J121212^aksaksj&ABS", pid3[0]);
         }
 
         [Fact]
@@ -117,6 +130,44 @@ namespace HL7_Tests
             Assert.Equal("No Known Allergies", al1_331[0]);
 
             Assert.Equal("NA", al1_332[0]);
+        }
+
+        [Fact]
+        public void GetArrayFieldTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            string[] pid3_0 = hl7.Get("PID_3[0]");
+            Assert.Equal("J000XXXXX^akjsaks", pid3_0[0]);
+
+            string[] pid3_1 = hl7.Get("PID_3[1]");
+            Assert.Equal("J121212^aksaksj&ABS", pid3_1[0]);
+
+            string[] pid3_1_1 = hl7.Get("PID_3[1]_1");
+            Assert.Equal("J121212", pid3_1_1[0]);
+
+            string[] pid3_1_2 = hl7.Get("PID_3[1]_2");
+            Assert.Equal("aksaksj&ABS", pid3_1_2[0]);
+
+            string[] pid3_1_2_1 = hl7.Get("PID_3[1]_2_1");
+            Assert.Equal("aksaksj", pid3_1_2_1[0]);
+
+            string[] pid3_1_2_2 = hl7.Get("PID_3[1]_2_2");
+            Assert.Equal("ABS", pid3_1_2_2[0]);
+
+        }
+
+        [Fact]
+        public void GetArrayDefaultFieldTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            string[] pid3_1 = hl7.Get("PID_3_1");
+            Assert.Null(pid3_1[0]);
         }
     }
 }

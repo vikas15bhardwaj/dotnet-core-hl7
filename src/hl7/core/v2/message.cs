@@ -28,19 +28,7 @@ namespace HL7.Core.V2
 
             foreach (var segment in message_segments)
             {
-
-                if (segment.StartsWith("MSH"))
-                {
-                    field_separator = segment.Substring(3, 1);
-                    component_separator = segment.Substring(4, 1);
-                    sub_component_separator = segment.Substring(7, 1);
-                    field_array_separator = segment.Substring(5, 1);
-                }
-                var segment_fields = segment.Split(field_separator.ToCharArray());
-                string segment_name = segment_fields[0];
-
-                int index = message_segment_list.Count(s => s.segment_name == segment_name);
-                message_segment_list.Add((segment_name, index, new Segment(segment, field_separator, component_separator, sub_component_separator, field_array_separator)));
+                AddSegment(segment);
             }
         }
 
@@ -65,7 +53,33 @@ namespace HL7.Core.V2
                 .Select(s => s.segment.Get(field)).ToArray();
         }
 
+        internal void Set(string field_name, string value)
+        {
+            var field = ParseField(field_name);
+            var segment_list = GetSegmentList(field.SegmentName, field.SegmentIndex);
+            //if requested field is just segment e.g. PID, then entire PID segment should be returned
+            if (field.FieldName == null)
+                AddSegment(value);
+            else
+                segment_list?
+                .ForEach(s => s.segment.Set(field, value));
+        }
 
+        private void AddSegment(string segment)
+        {
+            if (segment.StartsWith("MSH"))
+            {
+                field_separator = segment.Substring(3, 1);
+                component_separator = segment.Substring(4, 1);
+                sub_component_separator = segment.Substring(7, 1);
+                field_array_separator = segment.Substring(5, 1);
+            }
+            var segment_fields = segment.Split(field_separator.ToCharArray());
+            string segment_name = segment_fields[0];
+
+            int index = message_segment_list.Count(s => s.segment_name == segment_name);
+            message_segment_list.Add((segment_name, index, new Segment(segment, field_separator, component_separator, sub_component_separator, field_array_separator)));
+        }
         private List<(string segment_name, int index, Segment segment)> GetSegmentList(string segment_name, int index)
         {
             if (index >= 0)

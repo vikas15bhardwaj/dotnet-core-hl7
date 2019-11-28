@@ -50,18 +50,18 @@ namespace HL7.Core.V2
         }
         internal string Get(Field field)
         {
-
-            //if trying to get a full segment field e.g. MSH_10 or MSH9 or PID3. i.e. get all component, subcomponent and array in it.
             var field2 = _fields.Where(f => f.field_name == field.FieldName && f.index == field.FieldIndex);
             if (field2.Count() > 0 && String.IsNullOrEmpty(field.ComponentName))
                 return field2.Select(f => f.field_value).FirstOrDefault();
             else if (field2.Count() > 0)
-                return field2.Select(f => f.component.Get(field)).FirstOrDefault();
-
-            //if trying to get specific index of an array field. e.g. PID_3[0] i.e. first element of array of PID_3
-
+                return field2.Select(f => f.component?.Get(field))?.FirstOrDefault();
 
             return null;
+        }
+
+        internal void Set(Field field, string value)
+        {
+
         }
     }
 }

@@ -10,6 +10,8 @@ namespace HL7.Core.V2
         public string FieldName { get; set; }
         public int FieldIndex { get; set; }
         public string ComponentName { get; set; }
+        public int ComponentIndex { get; set; }
         public string SubComponentName { get; set; }
+        public int SubComponentIndex { get; set; }
     }
 }

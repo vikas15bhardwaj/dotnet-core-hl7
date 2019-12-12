@@ -18,5 +18,10 @@ namespace HL7
         {
             return _message.Get(field_name);
         }
+
+        public void Set(string field_name, string value)
+        {
+            _message.Set(field_name, value);
+        }
     }
 }

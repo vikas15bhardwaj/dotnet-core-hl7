@@ -169,5 +169,126 @@ namespace HL7_Tests
             string[] pid3_1 = hl7.Get("PID_3_1");
             Assert.Null(pid3_1[0]);
         }
+
+        [Fact]
+        public void SetSegmentFieldTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            Assert.Equal("AGTADM.1.260506.567", hl7.Get("MSH_10")[0]);
+            hl7.Set("MSH_10", "AGTADM.1.260506.567.Test");
+            Assert.Equal("AGTADM.1.260506.567.Test", hl7.Get("MSH_10")[0]);
+
+            string adt2 = hl7.Get();
+            Assert.NotEqual(adt2, adt);
+
+        }
+
+        [Fact]
+        public void SetComponentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            Assert.Equal("A08", hl7.Get("MSH_9_2")[0]);
+            hl7.Set("MSH_9_2", "A01");
+            Assert.Equal("A01", hl7.Get("MSH_9_2")[0]);
+
+            string adt2 = hl7.Get();
+            Assert.NotEqual(adt2, adt);
+        }
+
+        [Fact]
+        public void SetComponent_NoChangeTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            Assert.Equal("A08", hl7.Get("MSH_9_2")[0]);
+            hl7.Set("MSH_9_2", "A08");
+            Assert.Equal("A08", hl7.Get("MSH_9_2")[0]);
+
+            string adt2 = hl7.Get();
+            Assert.Equal(adt2, adt);
+        }
+
+        [Fact]
+        public void AddNewFieldTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            Assert.Null(hl7.Get("MSH_13")[0]);
+
+            hl7.Set("MSH_13", "newField");
+            Assert.Equal("newField", hl7.Get("MSH_13")[0]);
+            string adt2 = hl7.Get();
+            Assert.NotEqual(adt2, adt);
+        }
+
+        [Fact]
+        public void AddNewFieldWithComponentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            Assert.Null(hl7.Get("MSH_13")[0]);
+
+            hl7.Set("MSH_13", "newFieldC1^newFieldC2");
+            Assert.Equal("newFieldC1^newFieldC2", hl7.Get("MSH_13")[0]);
+            Assert.Equal("newFieldC1", hl7.Get("MSH_13_1")[0]);
+            Assert.Equal("newFieldC2", hl7.Get("MSH_13_2")[0]);
+
+            hl7.Set("MSH_13_2", "newFieldC22");
+            Assert.Equal("newFieldC1", hl7.Get("MSH_13_1")[0]);
+            Assert.Equal("newFieldC22", hl7.Get("MSH_13_2")[0]);
+            string adt2 = hl7.Get();
+            Assert.NotEqual(adt2, adt);
+        }
+
+        [Fact]
+        public void AddNewComponentFieldTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            Assert.Null(hl7.Get("MSH_13")[0]);
+
+            hl7.Set("MSH_13_1", "newComponent1");
+            Assert.Equal("newComponent1", hl7.Get("MSH_13_1")[0]);
+
+            hl7.Set("MSH_13_2", "newComponent2");
+            Assert.Equal("newComponent2", hl7.Get("MSH_13_2")[0]);
+
+            Assert.Equal("newComponent1^newComponent2", hl7.Get("MSH_13")[0]);
+
+        }
+
+        // [Fact]
+        // public void AddNewComponentFieldInMiddleTest()
+        // {
+        //     var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+        //     HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+        //     Assert.Null(hl7.Get("MSH_13")[0]);
+
+        //     hl7.Set("MSH_13_2", "newComponent2");
+        //     Assert.Equal("newComponent2", hl7.Get("MSH_13_2")[0]);
+        //     Assert.Equal("", hl7.Get("MSH_13_1")[0]);
+        //     Assert.Equal("^newComponent2", hl7.Get("MSH_13")[0]);
+
+        //     hl7.Set("MSH_13_1", "newComponent1");
+        //     Assert.Equal("newComponent1", hl7.Get("MSH_13_1")[0]);
+
+        //     Assert.Equal("newComponent1^newComponent2", hl7.Get("MSH_13")[0]);
+        // }
     }
 }

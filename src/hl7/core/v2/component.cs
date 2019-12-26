@@ -43,11 +43,16 @@ namespace HL7.Core.V2
             if (component.Count() > 0 && String.IsNullOrEmpty(field.SubComponentName))
                 return component.Select(f => f.component_value).FirstOrDefault();
             else if (component.Count() > 0)
-                return component.Select(f => f.sub_component.Get(field)).FirstOrDefault();
+                return component.Select(f => f.sub_component?.Get(field)).FirstOrDefault();
 
             return null;
         }
 
+        public void Set(string field_name, string value)
+        {
+            var component_name = $"{field_name}_1";
+            SaveField(component_name, value);
+        }
         public void Set(Field field, string value)
         {
             var component_index = components_list.FindIndex(c => c.component_name == field.ComponentName);
@@ -69,7 +74,8 @@ namespace HL7.Core.V2
                 components_list[component_index] = (component.component_name, value, component.sub_component);
             else if (component.sub_component == null)
             {
-                var sub_component = SubComponent.GetSubComponent(field.ComponentName, value, _sub_component_separator);
+                var sub_component = new SubComponent(component.component_name, component.component_value, _sub_component_separator);
+                sub_component.Set(field, value);
                 components_list[component_index] = (component.component_name, sub_component?.ToString() ?? value, sub_component);
             }
             else

@@ -317,7 +317,121 @@ namespace HL7_Tests
 
             Assert.Equal("MSH|^~\\&||COCQA1A|||201709050917||ADT^A08|AGTADM.1.260506.567|D|2.1|||||||||newField", hl7.GetSegment("MSH")[0]);
             Assert.Equal("EVN|A08|201709050917|||Component1^^^^^^|EVNField", hl7.GetSegment("EVN")[0]);
+        }
 
+        [Fact]
+        public void SetArrayFieldTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            Assert.Equal("J000XXXXX^akjsaks~J121212^aksaksj&ABS", hl7.Get("PID_3"));
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3[0]"));
+
+            hl7.Set("PID_3[0]_1", "A000XXXXX");
+            Assert.Equal("A000XXXXX", hl7.Get("PID_3[0]_1"));
+
+            Assert.Equal("A000XXXXX^akjsaks", hl7.Get("PID_3[0]"));
+            Assert.Equal("A000XXXXX^akjsaks~J121212^aksaksj&ABS", hl7.Get("PID_3"));
+
+        }
+        [Fact]
+        public void SetAddNewArrayItemTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            Assert.Equal("J000XXXXX^akjsaks~J121212^aksaksj&ABS", hl7.Get("PID_3"));
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3[0]"));
+            Assert.Equal("J121212^aksaksj&ABS", hl7.Get("PID_3[1]"));
+            Assert.Null(hl7.Get("PID_3[2]"));
+
+            hl7.Set("PID_3[2]_1", "B000XXXXX");
+            Assert.Equal("B000XXXXX", hl7.Get("PID_3[2]_1"));
+            Assert.Equal("B000XXXXX", hl7.Get("PID_3[2]"));
+            Assert.Equal("J000XXXXX^akjsaks~J121212^aksaksj&ABS~B000XXXXX", hl7.Get("PID_3"));
+
+        }
+
+        [Fact]
+        public void SetAddFreshNewArrayItemTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Null(hl7.Get("PID_19"));
+            Assert.Null(hl7.Get("PID_19[0]"));
+            hl7.Set("PID_19[0]_1", "W000XXXXX");
+
+            Assert.Equal("W000XXXXX", hl7.Get("PID_19"));
+            Assert.Equal("W000XXXXX", hl7.Get("PID_19[0]_1"));
+
+            Assert.Null(hl7.Get("PID_19[1]"));
+            hl7.Set("PID_19[1]_2", "TEST");
+            Assert.Equal("W000XXXXX~^TEST", hl7.Get("PID_19"));
+            Assert.Equal("W000XXXXX", hl7.Get("PID_19[0]"));
+
+            Assert.Equal("W000XXXXX", hl7.Get("PID_19[0]_1"));
+            Assert.Equal("", hl7.Get("PID_19[1]_1"));
+            Assert.Equal("TEST", hl7.Get("PID_19[1]_2"));
+            Assert.Equal("^TEST", hl7.Get("PID_19[1]"));
+
+        }
+
+        [Fact]
+        public void SetConvertSimpleToArrayField()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            Assert.Equal("J0009887878", hl7.Get("PID_18"));
+            hl7.Set("PID_18[0]_2", "AN");
+            Assert.Equal("J0009887878^AN", hl7.Get("PID_18"));
+            hl7.Set("PID_18[1]_1", "Xyyyaal");
+            hl7.Set("PID_18[1]_5", "Test");
+            Assert.Equal("J0009887878^AN~Xyyyaal^^^^Test", hl7.Get("PID_18"));
+            Assert.Equal("J0009887878^AN", hl7.Get("PID_18[0]"));
+            Assert.Equal("Xyyyaal^^^^Test", hl7.Get("PID_18[1]"));
+            Assert.Equal("Test", hl7.Get("PID_18[1]_5"));
+
+        }
+
+        [Fact]
+        public void SetSubComponentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal("No Known Allergies&NA", hl7.Get("AL1_3_3"));
+
+            Assert.Equal("No Known Allergies", hl7.Get("AL1_3_3_1"));
+
+            Assert.Equal("NA", hl7.Get("AL1_3_3_2"));
+
+            hl7.Set("AL1_3_3_2", "TEST");
+
+            Assert.Equal("TEST", hl7.Get("AL1_3_3_2"));
+            Assert.Equal("No Known Allergies", hl7.Get("AL1_3_3_1"));
+            Assert.Equal("No Known Allergies&TEST", hl7.Get("AL1_3_3"));
+            Assert.Equal("F001900388^No Known Allergies^No Known Allergies&TEST", hl7.Get("AL1_3"));
+
+        }
+
+        [Fact]
+        public void SetSubComponentNewTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Null(hl7.Get("AL1_3_1_2"));
+            hl7.Set("AL1_3_1_2", "TEST312");
+
+            Assert.Equal("TEST312", hl7.Get("AL1_3_1_2"));
+            Assert.Equal("F001900388&TEST312", hl7.Get("AL1_3_1"));
+            Assert.Equal("F001900388&TEST312^No Known Allergies^No Known Allergies&NA", hl7.Get("AL1_3"));
 
         }
     }

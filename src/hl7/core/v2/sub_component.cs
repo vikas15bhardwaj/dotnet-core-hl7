@@ -16,7 +16,7 @@ namespace HL7.Core.V2
             else
                 return new SubComponent(component_name, component_value, sub_component_separator);
         }
-        private SubComponent(string component_name, string component_value, string sub_component_separator)
+        internal SubComponent(string component_name, string component_value, string sub_component_separator)
         {
             _sub_component_separator = sub_component_separator;
             var sub_components = component_value.Split(sub_component_separator.ToCharArray());
@@ -50,7 +50,7 @@ namespace HL7.Core.V2
         }
         public override string ToString()
         {
-            return _sub_components_list.Select(s => s.sub_component_value).Aggregate((s1, s2) => s1 + _sub_components_list + s2);
+            return _sub_components_list.Select(s => s.sub_component_value).Aggregate((s1, s2) => s1 + _sub_component_separator + s2);
         }
     }
 }

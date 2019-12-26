@@ -59,12 +59,7 @@ namespace HL7.Core.V2
 
             if (fieldIndex < 0)
             {
-                int count = (_segment_name == "MSH" ? 2 : 1);
-                for (int i = _fields.Count() + count; i <= field.FieldNumber; i++)
-                {
-                    string field_name = $"{_segment_name}_{i}";
-                    SaveField(field_name, "");
-                }
+                AddNewFields(field);
                 fieldIndex = _fields.FindIndex(f => f.field_name == field.FieldName && f.index == field.FieldIndex);
             }
 
@@ -80,7 +75,18 @@ namespace HL7.Core.V2
                 thisField.component.Set(field, value);
                 thisField = (field.FieldName, thisField.index, thisField.component.ToString() ?? value, thisField.component);
                 _fields[fieldIndex] = thisField;
+
+                //update array field if needed
+                if (thisField.index > -1)
+                {
+                    var arr_top = _fields.FindIndex(f => f.field_name == field.FieldName && f.index == -1);
+                    var all_array_fields = _fields.FindAll(f => f.field_name == field.FieldName && f.index != -1);
+                    var arr_top_value = all_array_fields.Select(a => a.field_value).Aggregate((v1, v2) => v1 + _field_array_separator + v2);
+                    _fields[arr_top] = (field.FieldName, -1, arr_top_value, null);
+                }
             }
+
+
         }
 
         private void SaveField(string field_name, string field)
@@ -107,6 +113,62 @@ namespace HL7.Core.V2
                 _fields[fieldIndex] = (field_name, index, value, component);
             else
                 _fields.Add((field_name, index, value, component));
+        }
+
+        private void AddNewFields(Field field)
+        {
+            //if array item add it in a differnet way.
+            if (field.FieldIndex > -1)
+            {
+                AddArrayField(field);
+            }
+            else
+            {
+                int start_with_index = (_segment_name == "MSH" ? _fields.Count() + 2 : _fields.Count() + 1);
+
+                for (int i = start_with_index; i <= field.FieldNumber; i++)
+                {
+                    string field_name = $"{_segment_name}_{i}";
+                    SaveField(field_name, "");
+                }
+            }
+        }
+
+
+        private void AddArrayField(Field field)
+        {
+            int start_with_index = _fields.Where(f => f.field_name == field.FieldName && f.index > -1).Count();
+
+            for (int i = start_with_index; i <= field.FieldIndex; i++)
+            {
+                var original_field_index = _fields.FindIndex(f => f.index == -1 && f.field_name == field.FieldName);
+
+                if (original_field_index < 0)
+                {
+                    SaveField(field.FieldName, -1, "", null);
+                    SaveField(field.FieldName, i, "", null);
+                }
+                else
+                {
+                    string arr_item_value = "";
+                    Component component = null;
+                    if (i == 0)
+                    {
+                        arr_item_value = _fields[original_field_index].field_value;
+                        component = _fields[original_field_index].component;
+                        _fields[original_field_index] = (field.FieldName, -1, arr_item_value, null);
+                        if (component == null)
+                        {
+                            component = new Component(_component_separator, _sub_component_separator);
+                            component.Set(field.FieldName, arr_item_value);
+                        }
+                        SaveField(field.FieldName, i, arr_item_value, component);
+                    }
+                    else
+                        SaveField(field.FieldName, i, "", null);
+
+                }
+            }
         }
     }
 }

@@ -37,10 +37,10 @@ namespace HL7.Core.V2
             return message_segment_list.Select(s => s.segment.ToString()).Aggregate((s1, s2) => s1 + segment_separator + s2);
         }
 
-        internal string[] Get(string field_name)
+        internal string[] GetSegment(string segment_name)
         {
             //field_name needs to like MSH_2
-            var field = ParseField(field_name);
+            var field = ParseField(segment_name);
 
             var segment_list = GetSegmentList(field.SegmentName, field.SegmentIndex);
 
@@ -48,9 +48,22 @@ namespace HL7.Core.V2
             if (field.FieldName == null)
                 return segment_list?
                 .Select(s => s.segment.ToString()).ToArray();
-            else
+
+            return null;
+        }
+        internal string Get(string field_name)
+        {
+            //field_name needs to like MSH_2
+            var field = ParseField(field_name);
+
+            var segment_list = GetSegmentList(field.SegmentName, field.SegmentIndex);
+
+            //if requested field is just segment e.g. PID, then entire PID segment should be returned
+            if (field.FieldName != null)
                 return segment_list?
-                .Select(s => s.segment.Get(field)).ToArray();
+                .Select(s => s.segment.Get(field)).FirstOrDefault();
+
+            return null;
         }
 
         internal void Set(string field_name, string value)
@@ -116,6 +129,7 @@ namespace HL7.Core.V2
             string sub_component_name = null;
             int component_index = -1;
             int sub_component_index = -1;
+            int field_number = -1;
 
             Regex regex = new Regex("[^A-Z0-9+]");
 
@@ -137,6 +151,7 @@ namespace HL7.Core.V2
                         var f_detail = regex.Split(field);
 
                         field_name = segment_name + "_" + f_detail[0];
+                        field_number = Convert.ToInt32(f_detail[0]);
                         if (f_detail.Length >= 2)
                             field_index = Convert.ToInt32(f_detail[1]);
 
@@ -163,7 +178,8 @@ namespace HL7.Core.V2
                 ComponentName = component_name,
                 ComponentIndex = component_index,
                 SubComponentName = sub_component_name,
-                SubComponentIndex = sub_component_index
+                SubComponentIndex = sub_component_index,
+                FieldNumber = field_number
             };
         }
     }

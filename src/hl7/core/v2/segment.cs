@@ -31,7 +31,7 @@ namespace HL7.Core.V2
             foreach (var field in segment_fields.Skip(1))
             {
                 string field_name = $"{_segment_name}_{index}";
-                SaveField(index, field_name, field);
+                SaveField(field_name, field);
                 index++;
             }
 
@@ -54,42 +54,24 @@ namespace HL7.Core.V2
 
         internal void Set(Field field, string value)
         {
-            // var fieldIndex = _fields.FindIndex(f => f.field_name == field.FieldName && f.index == field.FieldIndex);
-            // //if we don't have main field then add main field first
-            // if (fieldIndex < 0)
-            //     SaveField(field.FieldIndex, field.FieldName, value);
 
-            // //if we already had the field or we also have component to update
-            // if (fieldIndex > 0 || !String.IsNullOrEmpty(field.ComponentName))
-            // {
-            //     fieldIndex = _fields.FindIndex(f => f.field_name == field.FieldName && f.index == field.FieldIndex);
+            var fieldIndex = _fields.FindIndex(f => f.field_name == field.FieldName && f.index == field.FieldIndex);
 
-            //     var thisField = _fields[fieldIndex];
-
-            //     if (thisField.component != null)
-            //     {
-            //         thisField.component.Set(field, value);
-            //         thisField = (field.FieldName, thisField.index, thisField.component.ToString(), thisField.component);
-            //     }
-            //     else
-            //     {
-            //         thisField.component = Component.GetComponent(field.FieldName, value, _component_separator, _sub_component_separator);
-            //         thisField = (field.FieldName, thisField.index, thisField.component?.ToString() ?? value, thisField.component);
-            //     }
-            //     _fields[fieldIndex] = thisField;
-            // }
-            if (String.IsNullOrEmpty(field.ComponentName))
-                SaveField(field.FieldIndex, field.FieldName, value);
-            else
-            //if we already had the field or we also have component to update
+            if (fieldIndex < 0)
             {
-                var fieldIndex = _fields.FindIndex(f => f.field_name == field.FieldName && f.index == field.FieldIndex);
-                if (fieldIndex < 0)
+                int count = (_segment_name == "MSH" ? 2 : 1);
+                for (int i = _fields.Count() + count; i <= field.FieldNumber; i++)
                 {
-                    SaveField(field.FieldIndex, field.FieldName, "");
-                    fieldIndex = _fields.FindIndex(f => f.field_name == field.FieldName && f.index == field.FieldIndex);
+                    string field_name = $"{_segment_name}_{i}";
+                    SaveField(field_name, "");
                 }
+                fieldIndex = _fields.FindIndex(f => f.field_name == field.FieldName && f.index == field.FieldIndex);
+            }
 
+            if (String.IsNullOrEmpty(field.ComponentName))
+                SaveField(field.FieldName, value);
+            else
+            {
                 var thisField = _fields[fieldIndex];
 
                 if (thisField.component == null)
@@ -101,7 +83,7 @@ namespace HL7.Core.V2
             }
         }
 
-        private void SaveField(int index, string field_name, string field)
+        private void SaveField(string field_name, string field)
         {
             if (field_name != "MSH_2" && field.Contains(_field_array_separator))
             {

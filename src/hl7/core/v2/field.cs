@@ -9,6 +9,8 @@ namespace HL7.Core.V2
         public int SegmentIndex { get; set; }
         public string FieldName { get; set; }
         public int FieldIndex { get; set; }
+
+        public int FieldNumber { get; set; }
         public string ComponentName { get; set; }
         public int ComponentIndex { get; set; }
         public string SubComponentName { get; set; }

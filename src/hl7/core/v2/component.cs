@@ -58,7 +58,7 @@ namespace HL7.Core.V2
                 {
                     var component_name = $"{field.FieldName}_{i}";
                     if (components_list.FindIndex(f => f.component_name == component_name) < 0)
-                        components_list.Add((field.ComponentName, "", null));
+                        components_list.Add((component_name, "", null));
                 }
                 component_index = components_list.FindIndex(c => c.component_name == field.ComponentName);
             }

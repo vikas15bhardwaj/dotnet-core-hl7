@@ -14,11 +14,15 @@ namespace HL7
         {
             return _message.Get();
         }
-        public string[] Get(string field_name)
+        public string[] GetSegment(string segment_name)
+        {
+            return _message.GetSegment(segment_name);
+        }
+
+        public string Get(string field_name)
         {
             return _message.Get(field_name);
         }
-
         public void Set(string field_name, string value)
         {
             _message.Set(field_name, value);

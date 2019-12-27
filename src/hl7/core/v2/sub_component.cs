@@ -39,6 +39,10 @@ namespace HL7.Core.V2
                                         .Select(f => f.sub_component_value).FirstOrDefault();
         }
 
+        public void Remove(Field field)
+        {
+            _sub_components_list.RemoveAll(s => s.sub_component_name == field.SubComponentName);
+        }
         public void Set(Field field, string value)
         {
             for (int i = _sub_components_list.Count() + 1; i <= field.SubComponentIndex; i++)

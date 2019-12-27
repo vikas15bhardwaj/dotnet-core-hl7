@@ -11,7 +11,7 @@ namespace HL7.Core.V2
 
         internal static Component GetComponent(string field_name, string field_value, string component_separator, string sub_component_separator)
         {
-            if (!field_value.Contains(component_separator))
+            if (field_value == null || !field_value.Contains(component_separator))
                 return null;
             else
                 return new Component(field_name, field_value, component_separator, sub_component_separator);
@@ -48,6 +48,23 @@ namespace HL7.Core.V2
             return null;
         }
 
+        public void Remove(Field field)
+        {
+            if (String.IsNullOrEmpty(field.SubComponentName))
+                components_list.RemoveAll(c => c.component_name == field.ComponentName);
+            else
+            {
+                var component_index = components_list.FindIndex(c => c.component_name == field.ComponentName);
+                var component = components_list[component_index];
+                if (component.sub_component != null)
+                {
+                    component.sub_component.Remove(field);
+                    component = (component.component_name, component.sub_component?.ToString() ?? null, component.sub_component);
+                    components_list[component_index] = component;
+                }
+            }
+
+        }
         public void Set(string field_name, string value)
         {
             var component_name = $"{field_name}_1";

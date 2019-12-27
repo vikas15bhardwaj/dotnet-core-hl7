@@ -502,18 +502,215 @@ namespace HL7_Tests
             Assert.Equal("410^42~411^412", hl7.Get("PV1_4"));
         }
 
-        // [Fact]
-        // public void AddSegmentTest()
-        // {
-        //     var adt = File.ReadAllText("../../../test-files/adt.hl7");
+        [Fact]
+        public void AddSegmentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
 
-        //     HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
-        //     Assert.Equal(2, hl7.GetSegment("ZCS").Length);
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal(2, hl7.GetSegment("ZCS").Length);
 
-        //     hl7.Set("ZCS", "ZCS|3|^^^^||||04444");
-        //     Assert.Equal(3, hl7.GetSegment("ZCS").Length);
-        //     Assert.Equal("ZCS|3|^^^^||||04444", hl7.GetSegment("ZCS")[2]);
+            hl7.AddSegment("ZCS|3|^^^^||||04444");
+            Assert.Equal(3, hl7.GetSegment("ZCS").Length);
+            Assert.Equal("ZCS|3|^^^^||||04444", hl7.GetSegment("ZCS")[2]);
 
-        // }
+        }
+
+        [Fact]
+        public void AddSegmentWithFieldsTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal(2, hl7.GetSegment("ZCS").Length);
+
+            hl7.AddSegment("ZCS|");
+            Assert.Equal(3, hl7.GetSegment("ZCS").Length);
+            Assert.Equal("ZCS|", hl7.GetSegment("ZCS")[2]);
+            hl7.Set("ZCS[2]_1", "3");
+            hl7.Set("ZCS[2]_2", "3.2");
+            hl7.Set("ZCS[2]_3", "3.3");
+            hl7.Set("ZCS[2]_5", "3.5");
+
+            Assert.Equal("3.5", hl7.Get("ZCS[2]_5"));
+            Assert.Equal("ZCS|3|3.2|3.3||3.5", hl7.GetSegment("ZCS")[2]);
+
+
+        }
+
+        [Fact]
+        public void RemoveAnyFieldTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+
+            Assert.Equal("04444", hl7.Get("ZCS[1]_6"));
+            Assert.Equal("ZCS|2|^^^^||||04444", hl7.GetSegment("ZCS[1]")[0]);
+
+            hl7.Set("ZCS[1]_6", "");
+            Assert.Equal("", hl7.Get("ZCS[1]_6"));
+            hl7.Remove("ZCS[1]_6");
+            Assert.Null(hl7.Get("ZCS[1]_6"));
+            Assert.Equal("ZCS|2|^^^^|||", hl7.GetSegment("ZCS[1]")[0]);
+
+
+        }
+
+        [Fact]
+        public void RemoveArrayOneElementTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal("J000XXXXX^akjsaks~J121212^aksaksj&ABS", hl7.Get("PID_3"));
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3[0]"));
+            Assert.Equal("J121212^aksaksj&ABS", hl7.Get("PID_3[1]"));
+
+            hl7.Remove("PID_3[1]");
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3[0]"));
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3"));
+
+            Assert.Equal("PID|1||J000XXXXX^akjsaks|J12334|TEST^TEST^^^^||19560425|F|^^^^^||^^^^37203^^^^|||||||J0009887878", hl7.GetSegment("PID")[0]);
+
+
+        }
+
+        [Fact]
+        public void RemoveArrayAllElementsTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal("J000XXXXX^akjsaks~J121212^aksaksj&ABS", hl7.Get("PID_3"));
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3[0]"));
+            Assert.Equal("J121212^aksaksj&ABS", hl7.Get("PID_3[1]"));
+
+            hl7.Remove("PID_3");
+            Assert.Null(hl7.Get("PID_3[0]"));
+            Assert.Null(hl7.Get("PID_3"));
+
+            Assert.Equal("PID|1||J12334|TEST^TEST^^^^||19560425|F|^^^^^||^^^^37203^^^^|||||||J0009887878", hl7.GetSegment("PID")[0]);
+
+
+        }
+        [Fact]
+        public void RemoveAndAddArrayOneElementTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal("J000XXXXX^akjsaks~J121212^aksaksj&ABS", hl7.Get("PID_3"));
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3[0]"));
+            Assert.Equal("J121212^aksaksj&ABS", hl7.Get("PID_3[1]"));
+
+            hl7.Remove("PID_3[1]");
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3[0]"));
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3"));
+
+            Assert.Equal("PID|1||J000XXXXX^akjsaks|J12334|TEST^TEST^^^^||19560425|F|^^^^^||^^^^37203^^^^|||||||J0009887878", hl7.GetSegment("PID")[0]);
+
+            hl7.Set("PID_3[1]_1", "J1212123");
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3[0]"));
+            Assert.Equal("J1212123", hl7.Get("PID_3[1]"));
+            Assert.Equal("J1212123", hl7.Get("PID_3[1]_1"));
+            Assert.Equal("PID|1||J000XXXXX^akjsaks~J1212123|J12334|TEST^TEST^^^^||19560425|F|^^^^^||^^^^37203^^^^|||||||J0009887878", hl7.GetSegment("PID")[0]);
+
+        }
+
+        [Fact]
+        public void RemoveArrayComponentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal("J000XXXXX^akjsaks~J121212^aksaksj&ABS", hl7.Get("PID_3"));
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3[0]"));
+            Assert.Equal("J121212^aksaksj&ABS", hl7.Get("PID_3[1]"));
+
+            hl7.Remove("PID_3[0]_2");
+            Assert.Equal("J000XXXXX", hl7.Get("PID_3[0]"));
+            Assert.Equal("J000XXXXX~J121212^aksaksj&ABS", hl7.Get("PID_3"));
+
+            Assert.Equal("PID|1||J000XXXXX~J121212^aksaksj&ABS|J12334|TEST^TEST^^^^||19560425|F|^^^^^||^^^^37203^^^^|||||||J0009887878", hl7.GetSegment("PID")[0]);
+
+        }
+
+        [Fact]
+        public void RemoveComponentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal("TEST^TEST^^^^", hl7.Get("PID_5"));
+            Assert.Equal("TEST", hl7.Get("PID_5_2"));
+
+            hl7.Remove("PID_5_2");
+            Assert.Equal("TEST^^^^", hl7.Get("PID_5"));
+
+            Assert.Equal("PID|1||J000XXXXX^akjsaks~J121212^aksaksj&ABS|J12334|TEST^^^^||19560425|F|^^^^^||^^^^37203^^^^|||||||J0009887878", hl7.GetSegment("PID")[0]);
+
+        }
+
+        [Fact]
+        public void RemoveSubComponentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal("F001900388^No Known Allergies^No Known Allergies&NA", hl7.Get("AL1_3"));
+            Assert.Equal("No Known Allergies&NA", hl7.Get("AL1_3_3"));
+
+            hl7.Remove("AL1_3_3_2");
+            Assert.Equal("F001900388^No Known Allergies^No Known Allergies", hl7.Get("AL1_3"));
+            Assert.Equal("No Known Allergies", hl7.Get("AL1_3_3"));
+
+            Assert.Equal("AL1|1|DA|F001900388^No Known Allergies^No Known Allergies|U||20170905", hl7.GetSegment("AL1")[0]);
+
+        }
+
+        [Fact]
+        public void RemoveArrayElemSubComponentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal("J000XXXXX^akjsaks~J121212^aksaksj&ABS", hl7.Get("PID_3"));
+            Assert.Equal("J000XXXXX^akjsaks", hl7.Get("PID_3[0]"));
+            Assert.Equal("J121212^aksaksj&ABS", hl7.Get("PID_3[1]"));
+
+
+            hl7.Remove("PID_3[1]_2_2");
+            Assert.Equal("J121212^aksaksj", hl7.Get("PID_3[1]"));
+            Assert.Equal("J000XXXXX^akjsaks~J121212^aksaksj", hl7.Get("PID_3"));
+
+            Assert.Equal("PID|1||J000XXXXX^akjsaks~J121212^aksaksj|J12334|TEST^TEST^^^^||19560425|F|^^^^^||^^^^37203^^^^|||||||J0009887878", hl7.GetSegment("PID")[0]);
+
+        }
+
+        [Fact]
+        public void RemoveAllSegmentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal(2, hl7.GetSegment("ZCS").Length);
+            hl7.RemoveSegment("ZCS");
+            Assert.Empty(hl7.GetSegment("ZCS"));
+            Assert.DoesNotContain("ZCS", hl7.Get());
+        }
+
+
+        [Fact]
+        public void RemoveOneSegmentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Equal(2, hl7.GetSegment("ZCS").Length);
+            hl7.RemoveSegment("ZCS[1]");
+            Assert.Single(hl7.GetSegment("ZCS"));
+            Assert.Equal("ZCS|1|^^^^||||04446", hl7.GetSegment("ZCS")[0]);
+        }
     }
 }

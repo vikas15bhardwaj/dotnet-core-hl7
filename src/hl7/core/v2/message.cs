@@ -80,6 +80,14 @@ namespace HL7.Core.V2
                 .ForEach(s => s.segment.Set(field, value));
         }
 
+        internal void Remove(string field_name)
+        {
+            var field = ParseField(field_name);
+            var segment_list = GetSegmentList(field.SegmentName, field.SegmentIndex);
+            segment_list?
+            .ForEach(s => s.segment.Remove(field));
+        }
+
         private void UpdateSegment(Field field, string segment)
         {
             var segments = message_segment_list.Where(s => s.segment_name == field.SegmentName).ToList();
@@ -90,7 +98,7 @@ namespace HL7.Core.V2
 
 
         }
-        private void AddSegment(string segment)
+        internal void AddSegment(string segment)
         {
             if (segment.StartsWith("MSH"))
             {
@@ -104,6 +112,14 @@ namespace HL7.Core.V2
 
             int index = message_segment_list.Count(s => s.segment_name == segment_name);
             message_segment_list.Add((segment_name, index, new Segment(segment, field_separator, component_separator, sub_component_separator, field_array_separator)));
+        }
+
+        internal void RemoveSegment(string segment_name)
+        {
+            var field = ParseField(segment_name);
+            var segment_list = GetSegmentList(field.SegmentName, field.SegmentIndex);
+
+            segment_list.ForEach(x => message_segment_list.Remove(x));
         }
         private List<(string segment_name, int index, Segment segment)> GetSegmentList(string segment_name, int index)
         {

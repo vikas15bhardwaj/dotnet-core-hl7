@@ -52,6 +52,41 @@ namespace HL7.Core.V2
             return null;
         }
 
+        internal void Remove(Field field)
+        {
+            var fieldIndex = _fields.FindIndex(f => f.field_name == field.FieldName && f.index == field.FieldIndex);
+            var thisField = _fields[fieldIndex];
+            if (String.IsNullOrEmpty(field.ComponentName))
+            {
+                //if specific array element being removed, then update main to reflect the changes
+                if (thisField.index > -1)
+                {
+                    var arr_top = _fields.FindIndex(f => f.field_name == field.FieldName && f.index == -1);
+                    var all_array_fields = _fields.FindAll(f => f.field_name == field.FieldName && f.index != -1 && f.index != thisField.index);
+                    var arr_top_value = all_array_fields.Select(a => a.field_value).Aggregate((v1, v2) => v1 + _field_array_separator + v2);
+                    _fields[arr_top] = (field.FieldName, -1, arr_top_value, null);
+
+                    _fields.Remove(thisField);
+                }
+                else
+                    _fields.RemoveAll(f => f.field_name == field.FieldName);
+            }
+            else if (thisField.component != null)
+            {
+                thisField.component.Remove(field);
+                thisField = (field.FieldName, thisField.index, thisField.component.ToString() ?? null, thisField.component);
+                _fields[fieldIndex] = thisField;
+                //update array field if needed
+                if (thisField.index > -1)
+                {
+                    var arr_top = _fields.FindIndex(f => f.field_name == field.FieldName && f.index == -1);
+                    var all_array_fields = _fields.FindAll(f => f.field_name == field.FieldName && f.index != -1);
+                    var arr_top_value = all_array_fields.Select(a => a.field_value).Aggregate((v1, v2) => v1 + _field_array_separator + v2);
+                    _fields[arr_top] = (field.FieldName, -1, arr_top_value, null);
+                }
+            }
+
+        }
         internal void Set(Field field, string value)
         {
 
@@ -91,7 +126,7 @@ namespace HL7.Core.V2
 
         private void SaveField(string field_name, string field)
         {
-            if (field_name != "MSH_2" && field.Contains(_field_array_separator))
+            if (field_name != "MSH_2" && field != null && field.Contains(_field_array_separator))
             {
                 //for an array field, add one entry with entire field and then one entry for each array element
                 SaveField(field_name, -1, field, null);

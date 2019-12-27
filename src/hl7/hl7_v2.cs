@@ -27,5 +27,20 @@ namespace HL7
         {
             _message.Set(field_name, value);
         }
+
+        public void AddSegment(string segment_name)
+        {
+            _message.AddSegment(segment_name);
+        }
+
+        public void Remove(string field_name)
+        {
+            _message.Remove(field_name);
+        }
+
+        public void RemoveSegment(string segment_name)
+        {
+            _message.RemoveSegment(segment_name);
+        }
     }
 }

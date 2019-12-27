@@ -430,9 +430,90 @@ namespace HL7_Tests
             hl7.Set("AL1_3_1_2", "TEST312");
 
             Assert.Equal("TEST312", hl7.Get("AL1_3_1_2"));
+            Assert.Equal("F001900388", hl7.Get("AL1_3_1_1"));
+
             Assert.Equal("F001900388&TEST312", hl7.Get("AL1_3_1"));
             Assert.Equal("F001900388&TEST312^No Known Allergies^No Known Allergies&NA", hl7.Get("AL1_3"));
 
         }
+
+        [Fact]
+        public void SetSubComponentSkipFewTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Null(hl7.Get("AL1_3_1_2"));
+            hl7.Set("AL1_3_1_5", "TEST315");
+
+            Assert.Equal("F001900388", hl7.Get("AL1_3_1_1"));
+            Assert.Equal("TEST315", hl7.Get("AL1_3_1_5"));
+
+            Assert.Equal("F001900388&&&&TEST315", hl7.Get("AL1_3_1"));
+            Assert.Equal("F001900388&&&&TEST315^No Known Allergies^No Known Allergies&NA", hl7.Get("AL1_3"));
+
+        }
+
+        [Fact]
+        public void SetAddNewSubComponentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Null(hl7.Get("PV1_4_1_1"));
+            hl7.Set("PV1_4_1_1", "411");
+
+            Assert.Equal("411", hl7.Get("PV1_4_1_1"));
+
+            Assert.Equal("411", hl7.Get("PV1_4_1"));
+            Assert.Equal("411", hl7.Get("PV1_4"));
+
+        }
+
+        [Fact]
+        public void SetAddNewSubComponentSkipTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            Assert.Null(hl7.Get("PV1_4_1_5"));
+            hl7.Set("PV1_4_1_5", "415");
+
+            Assert.Equal("415", hl7.Get("PV1_4_1_5"));
+
+            Assert.Equal("&&&&415", hl7.Get("PV1_4_1"));
+            Assert.Equal("&&&&415", hl7.Get("PV1_4"));
+
+        }
+
+        [Fact]
+        public void SetAddComponentAndSubComponentTest()
+        {
+            var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+            HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+            hl7.Set("PV1_4_2", "42");
+            Assert.Equal("^42", hl7.Get("PV1_4"));
+            hl7.Set("PV1_4[0]_1", "410");
+            Assert.Equal("410^42", hl7.Get("PV1_4"));
+            hl7.Set("PV1_4[1]_1", "411");
+            hl7.Set("PV1_4[1]_2", "412");
+
+            Assert.Equal("410^42~411^412", hl7.Get("PV1_4"));
+        }
+
+        // [Fact]
+        // public void AddSegmentTest()
+        // {
+        //     var adt = File.ReadAllText("../../../test-files/adt.hl7");
+
+        //     HL7.HL7V2 hl7 = new HL7.HL7V2(adt);
+        //     Assert.Equal(2, hl7.GetSegment("ZCS").Length);
+
+        //     hl7.Set("ZCS", "ZCS|3|^^^^||||04444");
+        //     Assert.Equal(3, hl7.GetSegment("ZCS").Length);
+        //     Assert.Equal("ZCS|3|^^^^||||04444", hl7.GetSegment("ZCS")[2]);
+
+        // }
     }
 }

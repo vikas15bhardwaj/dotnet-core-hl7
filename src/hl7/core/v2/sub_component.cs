@@ -41,11 +41,13 @@ namespace HL7.Core.V2
 
         public void Set(Field field, string value)
         {
+            for (int i = _sub_components_list.Count() + 1; i <= field.SubComponentIndex; i++)
+            {
+                string sub_component_name = $"{field.ComponentName}_{i}";
+                _sub_components_list.Add((sub_component_name, ""));
+            }
             var index = _sub_components_list.FindIndex(s => s.sub_component_name == field.SubComponentName);
-            if (index < 0)
-                _sub_components_list.Add((field.SubComponentName, value));
-            else
-                _sub_components_list[index] = (field.SubComponentName, value);
+            _sub_components_list[index] = (field.SubComponentName, value);
 
         }
         public override string ToString()

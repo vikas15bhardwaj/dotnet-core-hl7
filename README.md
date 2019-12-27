@@ -10,6 +10,16 @@ Assert.Equal("MSH|^~\\&||COCQA1A|||201709050917||ADT^A08|AGTADM.1.260506.567|D|2
 Assert.Equal("04444", hl7.Get("ZCS[1]_6"));
 
 ```
+
+To build and run the library execute following commands from terminal
+```
+$dotnet build
+$dotnet test
+```
+
+
+
+
 Library provides following functions:
 
 ### Get(string field_name)
